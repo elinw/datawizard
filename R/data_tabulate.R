@@ -39,10 +39,6 @@
 #' printed as markdown or HTML table, depending on the environment. See
 #' [`insight::export_table()`] for details.
 #' @param verbose Toggle warnings and messages.
-#' @param measures Optional character vector, indicating the types of
-#' percents to be included. Only applies to frequencies, i.e. when `by` is
-#' `NULL`. Can be `"raw"` (includes `NA` values), `"valid"` (excludes `NA` values)
-#' or `"cumulative"` (excludes `NA` vlues).
 #' @param ... not used.
 #' @inheritParams extract_column_names
 #'
@@ -150,16 +146,15 @@ data_tabulate <- function(x, ...) {
 #' @rdname data_tabulate
 #' @export
 data_tabulate.default <- function(
-  x,
-  by = NULL,
-  drop_levels = FALSE,
-  weights = NULL,
-  remove_na = FALSE,
-  proportions = NULL,
-  name = NULL,
-  verbose = TRUE,
-  measures = c("raw", "valid", "cumulative"),
-  ...
+    x,
+    by = NULL,
+    drop_levels = FALSE,
+    weights = NULL,
+    remove_na = FALSE,
+    proportions = NULL,
+    name = NULL,
+    verbose = TRUE,
+    ...
 ) {
   # save label attribute, before it gets lost...
   var_label <- attr(x, "label", exact = TRUE)
@@ -255,9 +250,7 @@ data_tabulate.default <- function(
     out$N <- round(out$N)
   }
 
-  if ("raw" %in% measures){
-    out$`Raw %` <- 100 * out$N / sum(out$N)
-  }
+  out$`Raw %` <- 100 * out$N / sum(out$N)
   # if we have missing values, we add a row with NA
   if (remove_na) {
     out$`Valid %` <- 100 * out$N / sum(out$N)
@@ -266,14 +259,8 @@ data_tabulate.default <- function(
     out$`Valid %` <- c(100 * out$N[-nrow(out)] / sum(out$N[-nrow(out)]), NA)
     valid_n <- sum(out$N[-length(out$N)], na.rm = TRUE)
   }
+  out$`Cumulative %` <- cumsum(out$`Valid %`)
 
-  if ("cumulative" %in% measures) {
-    out$`Cumulative %` <- cumsum(out$`Valid %`)
-  }
-
-  if (!"valid" %in% measures) {
-     out$`Valid %` <- NULL
-  }
   # add information about variable/group names
   if (!is.null(obj_name)) {
     if (is.null(group_variable)) {
@@ -311,19 +298,19 @@ data_tabulate.default <- function(
 #' @rdname data_tabulate
 #' @export
 data_tabulate.data.frame <- function(
-  x,
-  select = NULL,
-  exclude = NULL,
-  ignore_case = FALSE,
-  regex = FALSE,
-  by = NULL,
-  drop_levels = FALSE,
-  weights = NULL,
-  remove_na = FALSE,
-  proportions = NULL,
-  collapse = FALSE,
-  verbose = TRUE,
-  ...
+    x,
+    select = NULL,
+    exclude = NULL,
+    ignore_case = FALSE,
+    regex = FALSE,
+    by = NULL,
+    drop_levels = FALSE,
+    weights = NULL,
+    remove_na = FALSE,
+    proportions = NULL,
+    collapse = FALSE,
+    verbose = TRUE,
+    ...
 ) {
   # evaluate arguments
   select <- .select_nse(
@@ -368,19 +355,19 @@ data_tabulate.data.frame <- function(
 
 #' @export
 data_tabulate.grouped_df <- function(
-  x,
-  select = NULL,
-  exclude = NULL,
-  ignore_case = FALSE,
-  regex = FALSE,
-  by = NULL,
-  proportions = NULL,
-  drop_levels = FALSE,
-  weights = NULL,
-  remove_na = FALSE,
-  collapse = FALSE,
-  verbose = TRUE,
-  ...
+    x,
+    select = NULL,
+    exclude = NULL,
+    ignore_case = FALSE,
+    regex = FALSE,
+    by = NULL,
+    proportions = NULL,
+    drop_levels = FALSE,
+    weights = NULL,
+    remove_na = FALSE,
+    collapse = FALSE,
+    verbose = TRUE,
+    ...
 ) {
   grps <- attr(x, "groups", exact = TRUE)
   group_variables <- data_remove(grps, ".rows")
@@ -511,11 +498,11 @@ as.prop.table <- function(x, ...) {
 #' @rdname as.prop.table
 #' @export
 as.prop.table.datawizard_crosstab <- function(
-  x,
-  remove_na = TRUE,
-  simplify = FALSE,
-  verbose = TRUE,
-  ...
+    x,
+    remove_na = TRUE,
+    simplify = FALSE,
+    verbose = TRUE,
+    ...
 ) {
   # sanity check - the `.data.frame` method  returns a list, but not the
   # default method
@@ -532,7 +519,7 @@ as.prop.table.datawizard_crosstab <- function(
   if (remove_na) {
     if (
       verbose &&
-        ("NA" %in% colnames(prop_table) || "NA" %in% rownames(prop_table))
+      ("NA" %in% colnames(prop_table) || "NA" %in% rownames(prop_table))
     ) {
       insight::format_alert("Removing NA values from frequency table.")
     }
@@ -555,11 +542,11 @@ as.prop.table.datawizard_crosstab <- function(
 
 #' @export
 as.prop.table.datawizard_crosstabs <- function(
-  x,
-  remove_na = TRUE,
-  simplify = FALSE,
-  verbose = TRUE,
-  ...
+    x,
+    remove_na = TRUE,
+    simplify = FALSE,
+    verbose = TRUE,
+    ...
 ) {
   # only show message once we set `verbose = FALSE` in the lapply()
   if (remove_na && verbose) {
@@ -600,12 +587,12 @@ as.prop.table.datawizard_crosstabs <- function(
 #' @inheritParams base::as.data.frame
 #' @export
 as.data.frame.datawizard_tables <- function(
-  x,
-  row.names = NULL,
-  optional = FALSE,
-  ...,
-  stringsAsFactors = FALSE,
-  add_total = FALSE
+    x,
+    row.names = NULL,
+    optional = FALSE,
+    ...,
+    stringsAsFactors = FALSE,
+    add_total = FALSE
 ) {
   # extract variables of frequencies
   selected_vars <- unlist(lapply(x, function(i) attributes(i)$varname))
@@ -656,11 +643,11 @@ as.data.frame.datawizard_crosstabs <- as.data.frame.datawizard_tables
 #' @rdname as.prop.table
 #' @export
 as.table.datawizard_table <- function(
-  x,
-  remove_na = TRUE,
-  simplify = FALSE,
-  verbose = TRUE,
-  ...
+    x,
+    remove_na = TRUE,
+    simplify = FALSE,
+    verbose = TRUE,
+    ...
 ) {
   # sanity check - the `.data.frame` method (data_tabulate(mtcars, "cyl"))
   # returns a list, but not the default method (data_tabulate(mtcars$cyl))
@@ -690,11 +677,11 @@ as.table.datawizard_table <- function(
 
 #' @export
 as.table.datawizard_tables <- function(
-  x,
-  remove_na = TRUE,
-  simplify = FALSE,
-  verbose = TRUE,
-  ...
+    x,
+    remove_na = TRUE,
+    simplify = FALSE,
+    verbose = TRUE,
+    ...
 ) {
   # only show message once we set `verbose = FALSE` in the lapply()
   if (remove_na && verbose && .check_table_na(x)) {
@@ -720,11 +707,11 @@ as.table.datawizard_tables <- function(
 
 #' @export
 as.table.datawizard_crosstab <- function(
-  x,
-  remove_na = TRUE,
-  simplify = FALSE,
-  verbose = TRUE,
-  ...
+    x,
+    remove_na = TRUE,
+    simplify = FALSE,
+    verbose = TRUE,
+    ...
 ) {
   # sanity check - the `.data.frame` method  returns a list, but not the
   # default method
@@ -765,11 +752,11 @@ as.table.datawizard_crosstab <- function(
 
 #' @export
 as.table.datawizard_crosstabs <- function(
-  x,
-  remove_na = TRUE,
-  simplify = FALSE,
-  verbose = TRUE,
-  ...
+    x,
+    remove_na = TRUE,
+    simplify = FALSE,
+    verbose = TRUE,
+    ...
 ) {
   # only show message once we set `verbose = FALSE` in the lapply()
   if (remove_na && verbose && .check_xtable_na(x)) {
@@ -989,10 +976,10 @@ print.datawizard_tables <- function(x, big_mark = NULL, ...) {
 #' @rdname data_tabulate
 #' @export
 display.datawizard_table <- function(
-  object,
-  big_mark = NULL,
-  format = "markdown",
-  ...
+    object,
+    big_mark = NULL,
+    format = "markdown",
+    ...
 ) {
   format <- .display_default_format(format)
 
