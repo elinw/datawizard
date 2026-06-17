@@ -146,15 +146,15 @@ data_tabulate <- function(x, ...) {
 #' @rdname data_tabulate
 #' @export
 data_tabulate.default <- function(
-    x,
-    by = NULL,
-    drop_levels = FALSE,
-    weights = NULL,
-    remove_na = FALSE,
-    proportions = NULL,
-    name = NULL,
-    verbose = TRUE,
-    ...
+  x,
+  by = NULL,
+  drop_levels = FALSE,
+  weights = NULL,
+  remove_na = FALSE,
+  proportions = NULL,
+  name = NULL,
+  verbose = TRUE,
+  ...
 ) {
   # save label attribute, before it gets lost...
   var_label <- attr(x, "label", exact = TRUE)
